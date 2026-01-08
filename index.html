@@ -13,9 +13,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0B0B0B;
             min-height: 100vh;
             padding: 40px 20px;
+            color: #E6E6E6;
         }
 
         .container {
@@ -25,20 +26,25 @@
 
         .header {
             text-align: center;
-            color: white;
             margin-bottom: 40px;
             animation: fadeInDown 0.8s ease;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 4px 20px rgba(47, 191, 142, 0.3));
         }
 
         .header h1 {
             font-size: 3em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
+            background: linear-gradient(135deg, #2FBF8E 0%, #1E6F4A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
         }
 
         .search-box {
@@ -49,17 +55,22 @@
         .search-box input {
             width: 100%;
             padding: 15px 20px;
-            border: none;
-            border-radius: 50px;
+            border: 2px solid #1E6F4A;
+            border-radius: 12px;
             font-size: 1em;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #1A1A1A;
+            color: #E6E6E6;
             transition: all 0.3s ease;
         }
 
         .search-box input:focus {
             outline: none;
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border-color: #2FBF8E;
+            box-shadow: 0 0 0 3px rgba(47, 191, 142, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: #9CA3AF;
         }
 
         .pricing-grid {
@@ -70,23 +81,24 @@
         }
 
         .pricing-card {
-            background: white;
+            background: #1A1A1A;
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #0F3D2E;
             transition: all 0.3s ease;
             cursor: pointer;
         }
 
         .pricing-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(-5px);
+            border-color: #1E6F4A;
+            box-shadow: 0 10px 30px rgba(47, 191, 142, 0.2);
         }
 
         .city-name {
             font-size: 1.5em;
             font-weight: bold;
-            color: #667eea;
+            color: #2FBF8E;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -103,7 +115,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid rgba(30, 111, 74, 0.2);
         }
 
         .price-row:last-child {
@@ -111,36 +123,37 @@
         }
 
         .price-label {
-            color: #666;
+            color: #9CA3AF;
             font-size: 0.95em;
         }
 
         .price-value {
             font-size: 1.3em;
             font-weight: bold;
-            color: #764ba2;
+            color: #1E6F4A;
         }
 
         .price-value::after {
             content: " DA";
             font-size: 0.8em;
-            color: #999;
+            color: #9CA3AF;
         }
 
         .return-notice {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #1E6F4A 0%, #0F3D2E 100%);
+            color: #E6E6E6;
             padding: 20px;
             border-radius: 15px;
             text-align: center;
             margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #2FBF8E;
             animation: fadeIn 1.2s ease;
         }
 
         .return-notice h3 {
             font-size: 1.5em;
             margin-bottom: 10px;
+            color: #2FBF8E;
         }
 
         .return-notice p {
@@ -181,7 +194,7 @@
 
         .no-results {
             text-align: center;
-            color: white;
+            color: #9CA3AF;
             font-size: 1.2em;
             padding: 40px;
             display: none;
@@ -195,14 +208,18 @@
             .pricing-grid {
                 grid-template-columns: 1fr;
             }
+
+            .logo {
+                max-width: 150px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Arrow Delivery Pricing</h1>
-            <p>Fast & Reliable Delivery Across Algeria</p>
+            <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow Delivery Logo" class="logo">
+            <h1>Delivery Pricing</h1>
         </div>
 
         <div class="search-box">
