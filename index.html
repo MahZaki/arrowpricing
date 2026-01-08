@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrow Delivery Pricing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .city-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .city-name::before {
+            content: "📍";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .price-row:last-child {
+            border-bottom: none;
+        }
+
+        .price-label {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .price-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .price-value::after {
+            content: " DA";
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .return-notice {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 1.2s ease;
+        }
+
+        .return-notice h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .return-notice p {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Arrow Delivery Pricing</h1>
+            <p>Fast & Reliable Delivery Across Algeria</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Search for your city...">
+        </div>
+
+        <div class="pricing-grid" id="pricingGrid"></div>
+        <div class="no-results" id="noResults">No cities found matching your search.</div>
+
+        <div class="return-notice">
+            <h3>Return Fee</h3>
+            <p>50 DA</p>
+        </div>
+    </div>
+
+    <script>
+        const pricingData = [
+            { city: "Alger", domicile: 400, stop: 250 },
+            { city: "Blida", domicile: 550, stop: 350 },
+            { city: "Boumerdes", domicile: 550, stop: 350 },
+            { city: "Tipaza", domicile: 550, stop: 350 },
+            { city: "Ain Defla", domicile: 750, stop: 400 },
+            { city: "Ain Temouchent", domicile: 750, stop: 450 },
+            { city: "Annaba", domicile: 750, stop: 400 },
+            { city: "Batna", domicile: 750, stop: 400 },
+            { city: "Bejaia", domicile: 750, stop: 400 },
+            { city: "Bordj Bou Arreridj", domicile: 750, stop: 400 },
+            { city: "Bouira", domicile: 700, stop: 400 },
+            { city: "Chlef", domicile: 700, stop: 400 },
+            { city: "Constantine", domicile: 700, stop: 400 },
+            { city: "El Tarf", domicile: 700, stop: 400 },
+            { city: "Guelma", domicile: 750, stop: 400 },
+            { city: "Jijel", domicile: 750, stop: 400 },
+            { city: "Khenchela", domicile: 750, stop: 400 },
+            { city: "Mascara", domicile: 750, stop: 400 },
+            { city: "Medea", domicile: 750, stop: 400 },
+            { city: "Mila", domicile: 750, stop: 400 },
+            { city: "Mostaganem", domicile: 750, stop: 400 },
+            { city: "Msila", domicile: 750, stop: 400 },
+            { city: "Oran", domicile: 650, stop: 400 },
+            { city: "Oum El Bouaghi", domicile: 750, stop: 400 },
+            { city: "Relizane", domicile: 750, stop: 400 },
+            { city: "Saida", domicile: 780, stop: 400 },
+            { city: "Setif", domicile: 700, stop: 400 },
+            { city: "Sidi Bel Abbes", domicile: 750, stop: 400 },
+            { city: "Skikda", domicile: 750, stop: 400 },
+            { city: "Souk Ahras", domicile: 750, stop: 400 },
+            { city: "Tiaret", domicile: 750, stop: 400 },
+            { city: "Tissemsilt", domicile: 750, stop: 400 },
+            { city: "Tizi Ouzou", domicile: 650, stop: 400 },
+            { city: "Tlemcen", domicile: 750, stop: 400 },
+            { city: "Biskra", domicile: 850, stop: 400 },
+            { city: "Djelfa", domicile: 850, stop: 400 },
+            { city: "El Oued", domicile: 850, stop: 550 },
+            { city: "Ghardaia", domicile: 880, stop: 500 },
+            { city: "Laghouat", domicile: 880, stop: 500 },
+            { city: "Ouargla", domicile: 850, stop: 550 },
+            { city: "Tebessa", domicile: 800, stop: 450 },
+            { city: "El Bayadh", domicile: 850, stop: 650 },
+            { city: "Naama", domicile: 850, stop: 650 },
+            { city: "Bechar", domicile: 950, stop: 600 },
+            { city: "Adrar", domicile: 1150, stop: 850 },
+            { city: "Tindouf", domicile: 1300, stop: 900 },
+            { city: "Illizi", domicile: 1450, stop: 900 },
+            { city: "Tamanrasset", domicile: 1400, stop: 900 },
+            { city: "Timimoun", domicile: 1200, stop: 900 }
+        ];
+
+        function renderPricingCards(data) {
+            const grid = document.getElementById('pricingGrid');
+            const noResults = document.getElementById('noResults');
+            
+            grid.innerHTML = '';
+            
+            if (data.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'pricing-card';
+                card.innerHTML = `
+                    <div class="city-name">${item.city}</div>
+                    <div class="price-row">
+                        <span class="price-label">Domicile Delivery</span>
+                        <span class="price-value">${item.domicile}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="price-label">Stop Desk Pickup</span>
+                        <span class="price-value">${item.stop}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = pricingData.filter(item => 
+                item.city.toLowerCase().includes(searchTerm)
+            );
+            renderPricingCards(filteredData);
+        });
+
+        renderPricingCards(pricingData);
+    </script>
+</body>
+</html>
