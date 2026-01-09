@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Track Order</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: #fff;
+    padding: 20px;
+}
+.container {
+    max-width: 600px;
+    margin: auto;
+}
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+input {
+    background: #111;
+    color: #fff;
+    border: 1px solid #2FBF8E;
+}
+button {
+    background: #2FBF8E;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:hover {
+    background: #25a779;
+}
+.card {
+    background: #111;
+    padding: 15px;
+    margin-top: 20px;
+    border: 1px solid #2FBF8E;
+}
+.status {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2FBF8E;
+}
+.timeline {
+    margin-top: 15px;
+}
+.timeline-item {
+    border-left: 3px solid #2FBF8E;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+.small {
+    color: #aaa;
+    font-size: 14px;
+}
+.error {
+    color: #ff4d4d;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>📦 Track Your Order</h2>
+
+    <input id="tracking" placeholder="Enter tracking number">
+    <button onclick="track()">Track Order</button>
+
+    <div id="error" class="error"></div>
+    <div id="result"></div>
+</div>
+
+<script>
+const API_URL = "https://ecotrack.dz";
+const API_TOKEN = "qyW7zYNUhC5ssqT6VNpfSMOSlFkwzYaNVA02rha2sPPtpasV9KiRgO1qw52D";
+
+const statusMap = {
+    order_information_received_by_carrier: "Order Registered",
+    picked: "Picked Up",
+    accepted_by_carrier: "Received at Hub",
+    dispatched_to_driver: "Out for Delivery",
+    attempt_delivery: "Delivery Attempt",
+    livred: "Delivered",
+    return_asked: "Return Initiated",
+    return_in_transit: "Return in Transit",
+    Return_received: "Return Received"
+};
+
+async function track() {
+    const tracking = document.getElementById("tracking").value.trim();
+    const result = document.getElementById("result");
+    const error = document.getElementById("error");
+
+    result.innerHTML = "";
+    error.innerHTML = "";
+
+    if (!tracking) {
+        error.textContent = "Tracking number required";
+        return;
+    }
+
+    try {
+        const res = await fetch(
+            `${API_URL}/api/v1/get/tracking/info?tracking=${tracking}`,
+            { headers: { Authorization: `Bearer ${API_TOKEN}` } }
+        );
+
+        const data = await res.json();
+
+        if (!data.activity || data.activity.length === 0) {
+            error.textContent = "No tracking data found";
+            return;
+        }
+
+        const last = data.activity[data.activity.length - 1];
+
+        let html = `
+            <div class="card">
+                <div>Tracking: <b>${tracking}</b></div>
+                <div class="status">${statusMap[last.status] || last.status}</div>
+            </div>
+
+            <div class="card">
+                <h4>Tracking History</h4>
+                <div class="timeline">
+        `;
+
+        data.activity.reverse().forEach(item => {
+            html += `
+                <div class="timeline-item">
+                    <div><b>${statusMap[item.status] || item.status}</b></div>
+                    <div class="small">${item.date} ${item.time}</div>
+                    ${item.scanLocation ? `<div class="small">📍 ${item.scanLocation}</div>` : ""}
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+        result.innerHTML = html;
+
+    } catch (e) {
+        error.textContent = "Error connecting to tracking service";
+    }
+}
+</script>
+</body>
+</html>
