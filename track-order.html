@@ -379,197 +379,208 @@
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://imir.ecotrack.dz';
-        const API_TOKEN = 'ay3L95OJFBtMAnluCLy7a8wvhujxB34ykbm4VdtnqZNFw1i59wgP1mOAxQkT';
+  <script>
+    const API_URL = 'https://imir.ecotrack.dz';
+    const API_TOKEN = 'ay3L95OJFBtMAnluCLy7a8wvhujxB34ykbm4VdtnqZNFw1i59wgP1mOAxQkT';
 
-        // Status translations
-        const statusTranslations = {
-            'order_information_received_by_carrier': 'Order Registered',
-            'prete_a_expedier': 'Ready to Ship',
-            'picked': 'Picked Up',
-            'en_ramassage': 'Being Collected',
-            'vers_hub': 'To Hub',
-            'en_hub': 'At Hub',
-            'accepted_by_carrier': 'Received at Hub',
-            'vers_wilaya': 'To Destination',
-            'en_preparation': 'In Preparation',
-            'dispatched_to_driver': 'Out for Delivery',
-            'en_livraison': 'Out for Delivery',
-            'attempt_delivery': 'Delivery Attempt',
-            'suspendu': 'Suspended',
-            'livre_non_encaisse': 'Delivered - Not Collected',
-            'livred': 'Delivered',
-            'encaisse_non_paye': 'Collected - Not Paid',
-            'encaissed': 'Payment Collected',
-            'paiements_prets': 'Payment Ready',
-            'payed': 'Payment Completed',
-            'paye_et_archive': 'Paid & Archived',
-            'return_asked': 'Return Initiated',
-            'retour_chez_livreur': 'Return with Driver',
-            'return_in_transit': 'Return in Transit',
-            'retour_transit_entrepot': 'Return to Warehouse',
-            'retour_en_traitement': 'Return Processing',
-            'Return_received': 'Return Received',
-            'retour_recu': 'Return Received',
-            'retour_archive': 'Return Archived',
-            'annule': 'Cancelled',
-            'notification_on_order': 'Order Updated'
-        };
+    // Status translations
+    const statusTranslations = {
+        'order_information_received_by_carrier': 'Order Registered',
+        'prete_a_expedier': 'Ready to Ship',
+        'picked': 'Picked Up',
+        'en_ramassage': 'Being Collected',
+        'vers_hub': 'To Hub',
+        'en_hub': 'At Hub',
+        'accepted_by_carrier': 'Received at Hub',
+        'vers_wilaya': 'To Destination',
+        'en_preparation': 'In Preparation',
+        'dispatched_to_driver': 'Out for Delivery',
+        'en_livraison': 'Out for Delivery',
+        'attempt_delivery': 'Delivery Attempt',
+        'suspendu': 'Suspended',
+        'livre_non_encaisse': 'Delivered - Not Collected',
+        'livred': 'Delivered',
+        'encaisse_non_paye': 'Collected - Not Paid',
+        'encaissed': 'Payment Collected',
+        'paiements_prets': 'Payment Ready',
+        'payed': 'Payment Completed',
+        'paye_et_archive': 'Paid & Archived',
+        'return_asked': 'Return Initiated',
+        'retour_chez_livreur': 'Return with Driver',
+        'return_in_transit': 'Return in Transit',
+        'retour_transit_entrepot': 'Return to Warehouse',
+        'retour_en_traitement': 'Return Processing',
+        'Return_received': 'Return Received',
+        'retour_recu': 'Return Received',
+        'retour_archive': 'Return Archived',
+        'annule': 'Cancelled',
+        'notification_on_order': 'Order Updated'
+    };
 
-        // Check URL for tracking parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const trackingFromUrl = urlParams.get('tracking');
-        if (trackingFromUrl) {
-            document.getElementById('trackingNumber').value = trackingFromUrl;
-            trackOrder(trackingFromUrl);
+    // Check URL for tracking parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackingFromUrl = urlParams.get('tracking');
+    if (trackingFromUrl) {
+        document.getElementById('trackingNumber').value = trackingFromUrl;
+        trackOrder(trackingFromUrl);
+    }
+
+    document.getElementById('trackingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tracking = document.getElementById('trackingNumber').value.trim();
+        if (tracking) {
+            trackOrder(tracking);
         }
+    });
 
-        document.getElementById('trackingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const tracking = document.getElementById('trackingNumber').value.trim();
-            if (tracking) {
-                trackOrder(tracking);
+    async function trackOrder(tracking) {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('trackingCard').style.display = 'none';
+        document.getElementById('alert').style.display = 'none';
+
+        try {
+            // Correct API endpoint with api_token as query parameter
+            const url = `${API_URL}/api/v1/get/tracking/info?api_token=${API_TOKEN}&tracking=${tracking}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
 
-        async function trackOrder(tracking) {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('trackingCard').style.display = 'none';
-            document.getElementById('alert').style.display = 'none';
+            const data = await response.json();
+            console.log('API Response:', data);
 
-            try {
-                const response = await fetch(`${API_URL}/api/v1/get/tracking/info?tracking=${tracking}`, {
-                    headers: {
-                        'Authorization': `Bearer ${API_TOKEN}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data.errors) {
-                    showAlert('Invalid tracking number or order not found');
-                    return;
-                }
-
-                if (data.activity && data.activity.length > 0) {
-                    displayTrackingInfo(tracking, data);
-                    document.getElementById('trackingCard').style.display = 'block';
-                    
-                    // Update local storage with latest status
-                    updateLocalOrderStatus(tracking, data.activity);
-                } else {
-                    showAlert('No tracking information found for this number');
-                }
-            } catch (error) {
-                console.error('Tracking error:', error);
-                showAlert('Error tracking order. Please check the tracking number and try again.');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
+            // Check for validation errors
+            if (data.message && data.message.includes('invalid')) {
+                showAlert('Invalid tracking number. Please check and try again.');
+                return;
             }
+
+            // Check if we have activity data
+            if (data.activity && data.activity.length > 0) {
+                displayTrackingInfo(tracking, data);
+                document.getElementById('trackingCard').style.display = 'block';
+                
+                // Update local storage with latest status
+                updateLocalOrderStatus(tracking, data.activity);
+            } else {
+                showAlert('No tracking information found for this number. Please verify the tracking number.');
+            }
+        } catch (error) {
+            console.error('Tracking error:', error);
+            showAlert('Error tracking order. Please check the tracking number and try again.');
+        } finally {
+            document.getElementById('loading').style.display = 'none';
         }
+    }
 
-        function displayTrackingInfo(tracking, data) {
-            document.getElementById('displayTracking').textContent = `#${tracking}`;
+    function displayTrackingInfo(tracking, data) {
+        document.getElementById('displayTracking').textContent = `#${tracking}`;
 
-            // Get latest status
-            const latestActivity = data.activity[data.activity.length - 1];
-            const latestStatus = latestActivity.status;
-            const statusBadge = document.getElementById('statusBadge');
-            statusBadge.textContent = statusTranslations[latestStatus] || latestStatus.replace(/_/g, ' ').toUpperCase();
-            statusBadge.className = 'status-badge ' + getStatusClass(latestStatus);
+        // Get latest status
+        const latestActivity = data.activity[data.activity.length - 1];
+        const latestStatus = latestActivity.status;
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.textContent = statusTranslations[latestStatus] || latestStatus.replace(/_/g, ' ').toUpperCase();
+        statusBadge.className = 'status-badge ' + getStatusClass(latestStatus);
 
-            // Display order details
-            const detailsHtml = `
-                <div class="detail-item">
-                    <div class="detail-label">Customer Name</div>
-                    <div class="detail-value">${data.recipientName || 'N/A'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Shipped By</div>
-                    <div class="detail-value">${data.shippedBy || 'N/A'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Origin</div>
-                    <div class="detail-value">Wilaya ${data.originCity || 'N/A'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Destination</div>
-                    <div class="detail-value">Wilaya ${data.destLocationCity || 'N/A'}</div>
+        // Display order details
+        const detailsHtml = `
+            <div class="detail-item">
+                <div class="detail-label">Customer Name</div>
+                <div class="detail-value">${data.recipientName || 'N/A'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Shipped By</div>
+                <div class="detail-value">${data.shippedBy || 'N/A'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Origin</div>
+                <div class="detail-value">Wilaya ${data.originCity || 'N/A'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Destination</div>
+                <div class="detail-value">Wilaya ${data.destLocationCity || 'N/A'}</div>
+            </div>
+        `;
+        document.getElementById('orderDetails').innerHTML = detailsHtml;
+
+        // Display timeline
+        const timelineHtml = data.activity.map(item => {
+            let locationInfo = '';
+            if (item.scanLocation) {
+                locationInfo = `<div class="timeline-location">📍 ${item.scanLocation}</div>`;
+            }
+            
+            let detailsInfo = '';
+            if (item.reason) {
+                detailsInfo = `<div class="timeline-details">💬 ${item.reason}</div>`;
+            }
+            if (item.details) {
+                detailsInfo += `<div class="timeline-details">${item.details}</div>`;
+            }
+            if (item.postponed_to) {
+                detailsInfo += `<div class="timeline-details">📅 Postponed to: ${item.postponed_to}</div>`;
+            }
+
+            return `
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-status">${statusTranslations[item.status] || item.status.replace(/_/g, ' ').toUpperCase()}</div>
+                        <div class="timeline-date">${item.date} at ${item.time}</div>
+                        ${locationInfo}
+                        ${detailsInfo}
+                    </div>
                 </div>
             `;
-            document.getElementById('orderDetails').innerHTML = detailsHtml;
+        }).reverse().join('');
+        
+        document.getElementById('timeline').innerHTML = timelineHtml;
+    }
 
-            // Display timeline
-            const timelineHtml = data.activity.map(item => {
-                let locationInfo = '';
-                if (item.scanLocation) {
-                    locationInfo = `<div class="timeline-location">📍 ${item.scanLocation}</div>`;
-                }
-                
-                let detailsInfo = '';
-                if (item.reason) {
-                    detailsInfo = `<div class="timeline-details">💬 ${item.reason}</div>`;
-                }
-                if (item.details) {
-                    detailsInfo += `<div class="timeline-details">${item.details}</div>`;
-                }
-                if (item.postponed_to) {
-                    detailsInfo += `<div class="timeline-details">📅 Postponed to: ${item.postponed_to}</div>`;
-                }
+    function getStatusClass(status) {
+        if (status === 'livred' || status === 'livre_non_encaisse' || status === 'paye_et_archive') return 'delivered';
+        if (status.includes('return') || status.includes('retour') || status === 'annule') return 'returned';
+        if (status === 'dispatched_to_driver' || status === 'attempt_delivery' || status === 'en_livraison' || status === 'vers_wilaya') return 'in-transit';
+        if (status === 'picked' || status === 'accepted_by_carrier' || status === 'en_hub' || status === 'vers_hub' || status === 'en_ramassage') return 'picked';
+        if (status === 'suspendu') return 'suspended';
+        return 'created';
+    }
 
-                return `
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-status">${statusTranslations[item.status] || item.status.replace(/_/g, ' ').toUpperCase()}</div>
-                            <div class="timeline-date">${item.date} at ${item.time}</div>
-                            ${locationInfo}
-                            ${detailsInfo}
-                        </div>
-                    </div>
-                `;
-            }).reverse().join('');
-            
-            document.getElementById('timeline').innerHTML = timelineHtml;
+    function updateLocalOrderStatus(tracking, activity) {
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const orderIndex = orders.findIndex(o => o.tracking === tracking);
+        
+        if (orderIndex !== -1) {
+            const latestStatus = activity[activity.length - 1].status;
+            orders[orderIndex].status = latestStatus;
+            orders[orderIndex].lastUpdated = new Date().toISOString();
+            localStorage.setItem('orders', JSON.stringify(orders));
         }
+    }
 
-        function getStatusClass(status) {
-            if (status === 'livred' || status === 'livre_non_encaisse' || status === 'paye_et_archive') return 'delivered';
-            if (status.includes('return') || status.includes('retour') || status === 'annule') return 'returned';
-            if (status === 'dispatched_to_driver' || status === 'attempt_delivery' || status === 'en_livraison' || status === 'vers_wilaya') return 'in-transit';
-            if (status === 'picked' || status === 'accepted_by_carrier' || status === 'en_hub' || status === 'vers_hub' || status === 'en_ramassage') return 'picked';
-            if (status === 'suspendu') return 'suspended';
-            return 'created';
-        }
-
-        function updateLocalOrderStatus(tracking, activity) {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const orderIndex = orders.findIndex(o => o.tracking === tracking);
-            
-            if (orderIndex !== -1) {
-                const latestStatus = activity[activity.length - 1].status;
-                orders[orderIndex].status = latestStatus;
-                orders[orderIndex].lastUpdated = new Date().toISOString();
-                localStorage.setItem('orders', JSON.stringify(orders));
-            }
-        }
-
-        function showAlert(message) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = 'alert error';
-            alert.style.display = 'block';
-            
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 5000);
-        }
-    </script>
+    function showAlert(message) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = 'alert error';
+        alert.style.display = 'block';
+        
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+</script>v
 </body>
 </html>
