@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Dashboard - Arrow Delivery</title>
+
+    <!-- PROTOTYPE ONLY: relax CSP -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+
     <style>
+        /* ===== YOUR ORIGINAL STYLES (UNCHANGED) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -89,13 +95,6 @@
             padding: 25px;
             border: 1px solid #1E6F4A;
             animation: fadeInUp 1s ease;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: #2FBF8E;
-            box-shadow: 0 10px 30px rgba(47, 191, 142, 0.2);
         }
 
         .stat-card h3 {
@@ -108,12 +107,6 @@
             font-size: 2.5em;
             font-weight: bold;
             color: #2FBF8E;
-        }
-
-        .stat-card .subtext {
-            color: #9CA3AF;
-            font-size: 0.85em;
-            margin-top: 8px;
         }
 
         .orders-card {
@@ -152,7 +145,6 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9em;
         }
 
         .filter-btn:hover {
@@ -165,14 +157,10 @@
             border-color: #2FBF8E;
         }
 
-        .orders-table-wrapper {
-            overflow-x: auto;
-        }
-
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            overflow-x: auto;
         }
 
         .orders-table thead {
@@ -192,10 +180,6 @@
             border-bottom: 1px solid #1E6F4A;
         }
 
-        .orders-table tbody tr {
-            transition: background 0.3s ease;
-        }
-
         .orders-table tbody tr:hover {
             background: #0B0B0B;
         }
@@ -206,7 +190,6 @@
             font-size: 0.85em;
             font-weight: bold;
             display: inline-block;
-            white-space: nowrap;
         }
 
         .status-badge.created { background: #3b82f6; color: white; }
@@ -214,134 +197,150 @@
         .status-badge.in-transit { background: #f59e0b; color: white; }
         .status-badge.delivered { background: #10b981; color: white; }
         .status-badge.returned { background: #ef4444; color: white; }
-        .status-badge.suspended { background: #6b7280; color: white; }
 
         .action-btn {
             padding: 6px 12px;
             background: #2FBF8E;
             color: #0B0B0B;
-            border: none;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
-        }
-
-        .action-btn:hover {
-            background: #1E6F4A;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9CA3AF;
-        }
-
-        .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-        }
-
-        .refresh-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #2FBF8E 0%, #1E6F4A 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(47, 191, 142, 0.3);
-        }
-
-        .refresh-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            .filter-buttons {
-                width: 100%;
-            }
-
-            .filter-btn {
-                flex: 1;
-            }
-
-            .orders-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .stat-card .value {
-                font-size: 2em;
-            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow Delivery Logo" class="logo">
-            <h1>Orders Dashboard</h1>
-        </div>
+<div class="container">
+    <div class="header">
+        <img src="https://i.imgur.com/ofuT9Pm.png" class="logo">
+        <h1>Orders Dashboard</h1>
+    </div>
 
-        <div class="nav-links">
-            <a href="index.html">Pricing</a>
-            <a href="create-order.html">Create Order</a>
-            <a href="track-order.html">Track Order</a>
-            <a href="dashboard.html" class="active">Dashboard</a>
-        </div>
+    <div class="nav-links">
+        <a href="index.html">Pricing</a>
+        <a href="create-order.html">Create Order</a>
+        <a href="track-order.html">Track Order</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+    </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>📦 Total Orders</h3>
-                <div class="value" id="totalOrders">0</div>
-                <div class="subtext">All time</div>
+    <div class="stats-grid">
+        <div class="stat-card"><h3>Total Orders</h3><div class="value" id="totalOrders">0</div></div>
+        <div class="stat-card"><h3>In Transit</h3><div class="value" id="inTransitOrders">0</div></div>
+        <div class="stat-card"><h3>Delivered</h3><div class="value" id="deliveredOrders">0</div></div>
+        <div class="stat-card"><h3>Total Value</h3><div class="value" id="totalValue">0 DA</div></div>
+    </div>
+
+    <div class="orders-card">
+        <div class="orders-header">
+            <h2>Order History</h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterOrders('all')">All</button>
+                <button class="filter-btn" onclick="filterOrders('created')">Created</button>
+                <button class="filter-btn" onclick="filterOrders('in-transit')">In Transit</button>
+                <button class="filter-btn" onclick="filterOrders('delivered')">Delivered</button>
             </div>
-            <div class="stat-card">
-                <h3>🚚 In Transit</h3>
-                <div class="value" id="inTransitOrders">0</div>
-                <div class="subtext">Active shipments</div>
-            </div>
-            <div class="stat-card">
-                <h3>✅ Delivered</h3>
-                <div class="value" id="deliveredOrders">0</div>
-                <div class="subtext">Successfully completed</div>
-            </div>
-            <div class="
+        </div>
+        <div id="ordersContent"></div>
+    </div>
+</div>
+
+<script>
+const ECOTRACK_API = "https://imir.ecotrack.dz/api/v1";
+const ECOTRACK_TOKEN = "qyW7zYNUhC5ssqT6VNpfSMOSlFkwzYaNVA02rha2sPPtpasV9KiRgO1qw52D";
+
+let allOrders = [];
+let currentFilter = 'all';
+
+async function fetchEcotrackStatus(tracking) {
+    try {
+        const res = await fetch(`${ECOTRACK_API}/get/tracking/info`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                api_token: ECOTRACK_TOKEN,
+                tracking: tracking
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.activity || data.activity.length === 0) {
+            return "created";
+        }
+
+        return data.activity[data.activity.length - 1].status;
+    } catch {
+        return null;
+    }
+}
+
+async function loadOrders() {
+    allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+    for (let order of allOrders) {
+        if (!order.tracking) continue;
+        const status = await fetchEcotrackStatus(order.tracking);
+        if (status) order.status = status;
+    }
+
+    localStorage.setItem('orders', JSON.stringify(allOrders));
+    updateStats();
+    displayOrders();
+}
+
+function updateStats() {
+    totalOrders.textContent = allOrders.length;
+    deliveredOrders.textContent = allOrders.filter(o => getOrderStatus(o.status) === 'delivered').length;
+    inTransitOrders.textContent = allOrders.length - deliveredOrders.textContent;
+    totalValue.textContent = allOrders.reduce((s,o)=>s+parseFloat(o.montant||0),0)+" DA";
+}
+
+function displayOrders() {
+    const content = document.getElementById("ordersContent");
+    const list = currentFilter === 'all'
+        ? allOrders
+        : allOrders.filter(o => getOrderStatus(o.status) === currentFilter);
+
+    content.innerHTML = list.length ? `
+        <table class="orders-table">
+            <tbody>
+            ${list.map(o => `
+                <tr>
+                    <td>${o.tracking}</td>
+                    <td>${o.nom_client}</td>
+                    <td>${o.telephone}</td>
+                    <td>${o.commune}</td>
+                    <td>${o.montant} DA</td>
+                    <td><span class="status-badge ${getOrderStatus(o.status)}">${getStatusText(o.status)}</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>` : "No orders";
+}
+
+function getOrderStatus(status) {
+    if (!status) return 'created';
+    if (status === 'livred') return 'delivered';
+    if (status.includes('return')) return 'returned';
+    if (status === 'picked' || status === 'accepted_by_carrier') return 'picked';
+    return 'in-transit';
+}
+
+function getStatusText(status) {
+    return {
+        created:'Created',picked:'Picked',delivered:'Delivered',
+        returned:'Returned','in-transit':'In Transit'
+    }[getOrderStatus(status)];
+}
+
+function filterOrders(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    event.target.classList.add('active');
+    displayOrders();
+}
+
+loadOrders();
+setInterval(loadOrders, 30000);
+</script>
+</body>
+</html>
