@@ -439,14 +439,16 @@
             document.getElementById('alert').style.display = 'none';
 
             try {
-                const url = `${API_URL}/api/v1/get/tracking/info?api_token=${API_TOKEN}&tracking=${tracking}`;
-                
-                const response = await fetch(url, {
-                    method: 'GET',
+                const response = await fetch(`${API_URL}/api/v1/get/tracking/info`, {
+                    method: 'POST',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({
+                        api_token: API_TOKEN,
+                        tracking: tracking
+                    })
                 });
 
                 console.log('Response status:', response.status);
