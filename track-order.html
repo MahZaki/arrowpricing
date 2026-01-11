@@ -460,8 +460,13 @@
                 const data = await response.json();
                 console.log('API Response:', data);
 
-                if (data.message && data.message.includes('invalid')) {
-                    showAlert('Invalid tracking number. Please check and try again.');
+                // Check if the API returned an error
+                if (data.success === false || data.error) {
+                    if (data.message === 'Commande inexistante') {
+                        showAlert('❌ Order not found. This tracking number does not exist in the system. Please verify the number and try again.');
+                    } else {
+                        showAlert(`❌ ${data.message || 'Error tracking order. Please try again.'}`);
+                    }
                     return;
                 }
 
