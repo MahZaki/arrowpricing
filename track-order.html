@@ -425,11 +425,11 @@
             trackOrder(trackingFromUrl);
         }
 
-        document.getElementById('trackingForm').addEventListener('submit', function(e) {
+        document.getElementById('trackingForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const tracking = document.getElementById('trackingNumber').value.trim();
             if (tracking) {
-                trackOrder(tracking);
+                await trackOrder(tracking);
             }
         });
 
@@ -445,6 +445,7 @@
                 
                 const response = await fetch(url, {
                     method: 'GET',
+                    mode: 'cors',
                     headers: {
                         'Accept': 'application/json'
                     }
