@@ -439,16 +439,15 @@
             document.getElementById('alert').style.display = 'none';
 
             try {
-                const response = await fetch(`${API_URL}/api/v1/get/tracking/info`, {
-                    method: 'POST',
+                // Try exact format as their interface might use
+                const url = `${API_URL}/api/v1/get/tracking/info?api_token=${API_TOKEN}&tracking=${tracking}`;
+                console.log('Request URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        api_token: API_TOKEN,
-                        tracking: tracking
-                    })
+                        'Accept': 'application/json'
+                    }
                 });
 
                 console.log('Response status:', response.status);
