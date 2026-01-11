@@ -47,6 +47,45 @@
             text-shadow: none;
         }
 
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 30px;
+            background: #1A1A1A;
+            border: 2px solid #1E6F4A;
+            border-radius: 12px;
+            color: #E6E6E6;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            border-color: #2FBF8E;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #2FBF8E 0%, #1E6F4A 100%);
+            border-color: #2FBF8E;
+            box-shadow: 0 5px 20px rgba(47, 191, 142, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .search-box {
             margin-bottom: 30px;
             animation: fadeIn 1s ease;
@@ -80,16 +119,15 @@
             animation: fadeInUp 1s ease;
         }
 
-        .pricing-card {
+        .pricing-card, .desk-card {
             background: #1A1A1A;
             border-radius: 15px;
             padding: 25px;
             border: 1px solid #0F3D2E;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
 
-        .pricing-card:hover {
+        .pricing-card:hover, .desk-card:hover {
             transform: translateY(-5px);
             border-color: #1E6F4A;
             box-shadow: 0 10px 30px rgba(47, 191, 142, 0.2);
@@ -137,6 +175,63 @@
             content: " DA";
             font-size: 0.8em;
             color: #9CA3AF;
+        }
+
+        .wilaya-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2FBF8E;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1E6F4A;
+        }
+
+        .station-item {
+            background: rgba(30, 111, 74, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2FBF8E;
+        }
+
+        .station-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .station-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #E6E6E6;
+            margin-bottom: 8px;
+        }
+
+        .station-address {
+            color: #9CA3AF;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .station-address::before {
+            content: "📍";
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .station-phone {
+            color: #2FBF8E;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .station-phone::before {
+            content: "📞";
+            flex-shrink: 0;
         }
 
         .return-notice {
@@ -222,16 +317,32 @@
             <h1>Delivery Pricing</h1>
         </div>
 
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 Search for your city...">
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('pricing')">Pricing</button>
+            <button class="tab-button" onclick="switchTab('desks')">Desk Locations</button>
         </div>
 
-        <div class="pricing-grid" id="pricingGrid"></div>
-        <div class="no-results" id="noResults">No cities found matching your search.</div>
+        <div id="pricingTab" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search for your city...">
+            </div>
 
-        <div class="return-notice">
-            <h3>Return Fee</h3>
-            <p>50 DA</p>
+            <div class="pricing-grid" id="pricingGrid"></div>
+            <div class="no-results" id="noResults">No cities found matching your search.</div>
+
+            <div class="return-notice">
+                <h3>Return Fee</h3>
+                <p>50 DA</p>
+            </div>
+        </div>
+
+        <div id="desksTab" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="searchInputDesks" placeholder="🔍 Search for a wilaya or station...">
+            </div>
+
+            <div class="pricing-grid" id="desksGrid"></div>
+            <div class="no-results" id="noResultsDesks">No desk locations found matching your search.</div>
         </div>
     </div>
 
@@ -288,6 +399,105 @@
             { city: "Timimoun", domicile: 1200, stop: 900 }
         ];
 
+        const desksRawData = [
+            { wilaya: "Adrar", name: "Station Adrar - Timimoune", address: "Adrar, Adrar", phone: "0666647405" },
+            { wilaya: "Chlef", name: "Station Chlef", address: "حي البساتين، Chlef", phone: "0658380800 / 0770896097" },
+            { wilaya: "Laghouat", name: "Station Laghouat", address: "حي المحافير مقابل الباب الخلفي لجامعة البيولوجي، Laghouat", phone: "0670717957 / 0661953925" },
+            { wilaya: "Oum El Bouaghi", name: "Station Oum El Bouaghi", address: "176 سكن تساهمي طريق ڨليف. تحت مفتشية الجمارك الجزائرية وبالقرب من عيادة نوميديا سيفاكس، Oum El Bouaghi", phone: "0542104530" },
+            { wilaya: "Oum El Bouaghi", name: "Station Ain Fekroune", address: "Ain Fekroune، Oum El Bouaghi", phone: "000000000" },
+            { wilaya: "Batna", name: "Station Batna", address: "En face la grande poste & CPA، Batna", phone: "0771420592 / 0696409534" },
+            { wilaya: "Bejaia", name: "Station Bejaia", address: "34 Rue Kamel laadjouz (derrière prison Lakhmisse)، Bejaia", phone: "0779678690 / 0552804524" },
+            { wilaya: "Biskra", name: "Station Biskra", address: "حي 300 مسكن العالية_بجنب الأمن الحضري السابع، Biskra", phone: "0770317195 / 0669740509" },
+            { wilaya: "Bechar", name: "Station Béchar", address: "Bechar", phone: "0560913908" },
+            { wilaya: "Blida", name: "Station Blida", address: "شارع 24 بلقاسم الوزري – أمام مقر المحكمة بالبليدة – لاري كوشا، Blida", phone: "0550905228 / 0550905195" },
+            { wilaya: "Blida", name: "Station Bouinan", address: "Bouinan، Blida", phone: "0791154416 / 0784076503" },
+            { wilaya: "Blida", name: "Station Larbaa", address: "Larbaa، Blida", phone: "0774743637" },
+            { wilaya: "Bouira", name: "Station Bouira", address: "Cité Ammar khoudja route Ain tork، Bouira", phone: "0661582229 / 0794979723" },
+            { wilaya: "Tamanrasset", name: "Station Tamanrasset (NEW)", address: "Centre commercial communal de Ksar El Fouqani، Tamanrasset", phone: "0660432057 / 0664446245" },
+            { wilaya: "Tamanrasset", name: "Station Tamanrasset", address: "Tamanrasset", phone: "0560000000" },
+            { wilaya: "Tebessa", name: "Station Tébessa", address: "حي 500 سكن عدل تبسم (حي باتيجاك تبسة)، Tebessa", phone: "0675184480 / 0550060884" },
+            { wilaya: "Tlemcen", name: "Station Tlemcen", address: "1 avenue el yebdri, Mansour، Tlemcen", phone: "0673393999 / 0662697606" },
+            { wilaya: "Tiaret", name: "Station Tiaret", address: "حي المنظر الجميل (volani) بالضبط فوق 8eme أمام الجمعية، Tiaret", phone: "0657487526" },
+            { wilaya: "Tizi Ouzou", name: "Station Tizi Ouzou", address: "Cité 5 juillet bat 1, local 9، Tizi Ouzou", phone: "0770552045" },
+            { wilaya: "Alger", name: "Station Sidi Abdellah", address: "Sidi Abdellah، Zeralda", phone: "0770179353" },
+            { wilaya: "Alger", name: "Station Cheraga", address: "boulevard souidani boujamaa، Cheraga", phone: "0549791011" },
+            { wilaya: "Alger", name: "Station Bologhine", address: "Bologhine Ibnou Ziri، Alger", phone: "0550000000" },
+            { wilaya: "Alger", name: "Station El Hamiz", address: "Said Hamdine، Alger", phone: "0550000000" },
+            { wilaya: "Alger", name: "Station Beaulieu", address: "Cité Ali Khodja n°129, El Makane El Jamil، El Harrach", phone: "0555353929 / 0557641528" },
+            { wilaya: "Alger", name: "Station Les Eucalyptus", address: "Les Eucalyptus، Alger", phone: "0672302608" },
+            { wilaya: "Alger", name: "Station Oulad Fayet", address: "Ouled Fayet، Alger", phone: "0549589272" },
+            { wilaya: "Alger", name: "Station Birkhadem", address: "Birkhadem، Alger", phone: "0556038678" },
+            { wilaya: "Alger", name: "Station Bordj El Bahri", address: "Bordj El Bahri، Alger", phone: "0550000000" },
+            { wilaya: "Alger", name: "Station Said Hamdine", address: "13 lot hai solh said hamdine، Bir Mourad Rais", phone: "0661790559 / 0661790517" },
+            { wilaya: "Alger", name: "Station Principale", address: "cité Hayat، Djasr Kasentina", phone: "0776135221" },
+            { wilaya: "Djelfa", name: "Station Djelfa", address: "محور دوران حي الوأم مقابل محل، Djelfa", phone: "0660569097 / 0655597172" },
+            { wilaya: "Jijel", name: "Station Jijel", address: "Lotissement bourmel 04 Rue lounis Mustapha، Jijel", phone: "0699212417 / 0772560175" },
+            { wilaya: "Setif", name: "Station Sétif", address: "أولاد براهم مقابل ثانوية الحرائق باب دخول التلاميذ، Setif", phone: "0793949199 / 0795181513" },
+            { wilaya: "Setif", name: "Station El Eulma", address: "Cité Bahlouli، El Eulma", phone: "0558467681" },
+            { wilaya: "Saida", name: "Station Saida", address: "Saida", phone: "0699927790 / 0670711769" },
+            { wilaya: "Saida", name: "Station Saïda (new)", address: "Saida", phone: "0660336661 / 0777258714" },
+            { wilaya: "Skikda", name: "Station Skikda", address: "حي مرج الديب مقابل مديرية التكوين المهني، Skikda", phone: "0697127834 / 0799834205" },
+            { wilaya: "Sidi Bel Abbes", name: "Station Sidi Bel Abbès", address: "Sidi Bel Abbes", phone: "0655667174" },
+            { wilaya: "Annaba", name: "Station Annaba", address: "Taher ben Achour، Rue Colonel Amirouche، N° 05 Lots B، Annaba", phone: "0660988623 / 0770673728" },
+            { wilaya: "Guelma", name: "Station Guelma (new)", address: "Guelma", phone: "0662801001 / 0781092825" },
+            { wilaya: "Guelma", name: "Station Guelma", address: "Guelma", phone: "0781092825" },
+            { wilaya: "Constantine", name: "Station Constantine", address: "UV 02 projet de 265 logement participatif bt 02 n° 11 ali mendjli، Constantine", phone: "0776144470 / 0773639602" },
+            { wilaya: "Medea", name: "Station Medea", address: "Médéa", phone: "0556478022 / 0784544095" },
+            { wilaya: "Mostaganem", name: "Station Mostaganem", address: "Mostaganem", phone: "0663308597" },
+            { wilaya: "M'Sila", name: "Station M'Sila", address: "M'sila", phone: "0664126041" },
+            { wilaya: "Mascara", name: "Station Mascara", address: "Mascara", phone: "0660524341" },
+            { wilaya: "Ouargla", name: "Station Ouargla", address: "Cité El Makhadma, en face du cimetière Sidi Mansou، Ouargla", phone: "0698457373 / 0696971912" },
+            { wilaya: "Oran", name: "Station Maraval", address: "Maraval، Oran", phone: "0550000000" },
+            { wilaya: "Oran", name: "Station Lusto", address: "Lusto، Oran", phone: "0773148152" },
+            { wilaya: "El Bayadh", name: "Station El Bayadh", address: "حي سعادة مقابل مسجد صوف، El Bayadh", phone: "0673444871 / 0673278291" },
+            { wilaya: "Bordj Bou Arreridj", name: "Station Bordj Bou Arreridj", address: "محل رقم 02 حي 17أكتوبر شارع اد رقم 38 قسم 126، Bordj Bou Arreridj", phone: "0776867264 / 0770334718" },
+            { wilaya: "Boumerdes", name: "Station Boumerdès", address: "COOPERATIVE NASSIM 11 DECEMBRE، Boumerdes", phone: "0778342968" },
+            { wilaya: "Tissemsilt", name: "Station Tissemsilt", address: "مقابل قاعة متعددة الرياضات عين البرج، Tissemsilt", phone: "0784814235 / 0656911066" },
+            { wilaya: "El Oued", name: "Station El Oued", address: "El Oued", phone: "0000000000" },
+            { wilaya: "Khenchela", name: "Station Khenchela", address: "route des poids lourds، Khenchela", phone: "0781678449 / 0662820121" },
+            { wilaya: "Souk Ahras", name: "Station Souk Ahras", address: "Souk Ahras", phone: "0550396588" },
+            { wilaya: "Tipaza", name: "Station Tipaza (New)", address: "Tipaza", phone: "0770000000" },
+            { wilaya: "Tipaza", name: "Station Hadjout", address: "Hadjout، Tipaza", phone: "0773717530" },
+            { wilaya: "Mila", name: "Station Mila", address: "شارع عيسى صايف، حي قض الماء، قرب المحكمة، Mila", phone: "0797729155" },
+            { wilaya: "Ain Defla", name: "Station Aïn Defla", address: "حي خياط محمد فوق فندق ناجم، Ain Defla", phone: "0669796429 / 0676519825" },
+            { wilaya: "Ain Defla", name: "Station Khemis Miliana", address: "Rue Halaïmi Mohamed, Khemis Miliana", phone: "0792661720 / 0563078611" },
+            { wilaya: "Naama", name: "Station Naama", address: "Naama", phone: "0560271135" },
+            { wilaya: "Ain Temouchent", name: "Station Aïn Témouchent", address: "Cité 300 logts akid Abbes، Ain Temouchent", phone: "0774890047 / 0552377638" },
+            { wilaya: "Relizane", name: "Station Relizane (Oued Rhiou)", address: "Relizane", phone: "0667378782" },
+            { wilaya: "Touggourt", name: "Station Touggourt", address: "Touggourt", phone: "0770008080" },
+            { wilaya: "Djanet", name: "Station Djanet", address: "Djanet", phone: "0000000000" },
+            { wilaya: "El Meniaa", name: "Station El Meniaa", address: "El Meniaa", phone: "0658078154" }
+        ];
+
+        // Group desks by wilaya
+        const desksData = {};
+        desksRawData.forEach(desk => {
+            if (!desksData[desk.wilaya]) {
+                desksData[desk.wilaya] = [];
+            }
+            desksData[desk.wilaya].push({
+                name: desk.name,
+                address: desk.address,
+                phone: desk.phone
+            });
+        });
+
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (tabName === 'pricing') {
+                document.getElementById('pricingTab').classList.add('active');
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('desksTab').classList.add('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
         function renderPricingCards(data) {
             const grid = document.getElementById('pricingGrid');
             const noResults = document.getElementById('noResults');
@@ -321,6 +531,47 @@
             });
         }
 
+        function renderDeskCards(data) {
+            const grid = document.getElementById('desksGrid');
+            const noResults = document.getElementById('noResultsDesks');
+            
+            grid.innerHTML = '';
+            
+            if (Object.keys(data).length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            
+            // Sort wilayas alphabetically
+            const sortedWilayas = Object.keys(data).sort();
+            
+            sortedWilayas.forEach(wilaya => {
+                const card = document.createElement('div');
+                card.className = 'desk-card';
+                
+                let stationsHTML = '';
+                data[wilaya].forEach(station => {
+                    stationsHTML += `
+                        <div class="station-item">
+                            <div class="station-name">${station.name}</div>
+                            <div class="station-address">${station.address}</div>
+                            <div class="station-phone">${station.phone}</div>
+                        </div>
+                    `;
+                });
+                
+                card.innerHTML = `
+                    <div class="wilaya-header">${wilaya}</div>
+                    ${stationsHTML}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
@@ -330,7 +581,28 @@
             renderPricingCards(filteredData);
         });
 
+        const searchInputDesks = document.getElementById('searchInputDesks');
+        searchInputDesks.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = {};
+            
+            Object.keys(desksData).forEach(wilaya => {
+                const matchingStations = desksData[wilaya].filter(station =>
+                    wilaya.toLowerCase().includes(searchTerm) ||
+                    station.name.toLowerCase().includes(searchTerm) ||
+                    station.address.toLowerCase().includes(searchTerm)
+                );
+                
+                if (matchingStations.length > 0) {
+                    filteredData[wilaya] = matchingStations;
+                }
+            });
+            
+            renderDeskCards(filteredData);
+        });
+
         renderPricingCards(pricingData);
+        renderDeskCards(desksData);
     </script>
 </body>
 </html>
