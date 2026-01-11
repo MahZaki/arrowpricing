@@ -506,7 +506,7 @@
             document.getElementById('ordersContainer').innerHTML = '';
 
             try {
-                const url = `${API_URL}/api/v1/get/tracking/list?api_token=${API_TOKEN}`;
+                const url = `${API_URL}/api/v1/get/orders?api_token=${API_TOKEN}`;
                 console.log('Fetching from:', url);
                 
                 const response = await fetch(url, {
@@ -527,21 +527,14 @@
 
                 const data = await response.json();
                 console.log('Orders API Response:', data);
-                console.log('Data structure:', JSON.stringify(data, null, 2));
 
-                // Handle different possible response structures
-                if (Array.isArray(data)) {
-                    allOrders = data;
-                } else if (data && data.data && Array.isArray(data.data)) {
+                // The API returns paginated data with 'data' array
+                if (data && Array.isArray(data.data)) {
                     allOrders = data.data;
-                } else if (data && data.orders && Array.isArray(data.orders)) {
-                    allOrders = data.orders;
-                } else if (data && typeof data === 'object') {
-                    // If it's an object with keys, try to get the values
-                    const values = Object.values(data);
-                    if (values.length > 0 && Array.isArray(values[0])) {
-                        allOrders = values[0];
-                    }
+                } else if (Array.isArray(data)) {
+                    allOrders = data;
+                } else {
+                    allOrders = [];
                 }
 
                 console.log('Processed orders:', allOrders);
@@ -610,8 +603,8 @@
                         ${pageOrders.map(order => `
                             <tr onclick="viewOrder('${order.tracking}')">
                                 <td><strong>${order.tracking}</strong></td>
-                                <td>${order.recipientName || 'N/A'}</td>
-                                <td>Wilaya ${order.destLocationCity || 'N/A'}</td>
+                                <td>${order.client || 'N/A'}</td>
+                                <td>Wilaya ${order.wilaya_id || 'N/A'}</td>
                                 <td><span class="status-badge ${getStatusClass(order.status)}">${statusTranslations[order.status] || order.status}</span></td>
                                 <td>${formatDate(order.created_at)}</td>
                             </tr>
