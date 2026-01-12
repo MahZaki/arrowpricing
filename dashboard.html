@@ -914,4 +914,8 @@
                 if (dateTo) {
                     const orderDate = new Date(order.created_at);
                     const toDate = new Date(dateTo);
-                    toDate.setH
+                    toDate.setHours(23, 59, 59, 999);
+                    if (orderDate > toDate) {
+                        match = false;
+                    }
+                }
