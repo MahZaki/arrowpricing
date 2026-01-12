@@ -76,6 +76,117 @@
             color: #0B0B0B;
         }
 
+        .token-card {
+            background: #1A1A1A;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #1E6F4A;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .token-card h3 {
+            color: #2FBF8E;
+            margin-bottom: 15px;
+        }
+
+        .token-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .token-input-wrapper {
+            flex: 1;
+        }
+
+        .token-input-wrapper label {
+            display: block;
+            color: #9CA3AF;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .token-input-wrapper input {
+            width: 100%;
+            padding: 12px;
+            background: #0B0B0B;
+            border: 2px solid #1E6F4A;
+            border-radius: 8px;
+            color: #E6E6E6;
+            font-size: 0.95em;
+        }
+
+        .token-input-wrapper input:focus {
+            outline: none;
+            border-color: #2FBF8E;
+        }
+
+        .token-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2FBF8E 0%, #1E6F4A 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .token-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(47, 191, 142, 0.3);
+        }
+
+        .token-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .token-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .token-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .token-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .dashboard-content {
+            display: none;
+        }
+
+        .dashboard-content.active {
+            display: block;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -363,6 +474,14 @@
             .orders-table td {
                 padding: 10px 5px;
             }
+
+            .token-input-group {
+                flex-direction: column;
+            }
+
+            .token-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -380,85 +499,107 @@
             <a href="#dashboard" class="active">Dashboard</a>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📦</div>
-                <div class="stat-label">Total Orders</div>
-                <div class="stat-value" id="totalOrders">0</div>
+        <!-- Token Authentication Section -->
+        <div class="token-card" id="tokenCard">
+            <h3>🔐 Authentication Required</h3>
+            <p style="color: #9CA3AF; margin-bottom: 15px;">Please enter your API token to access the dashboard</p>
+            <div class="token-input-group">
+                <div class="token-input-wrapper">
+                    <label>API Token</label>
+                    <input type="password" id="apiTokenInput" placeholder="Enter your API token...">
+                </div>
+                <button class="token-btn" onclick="authenticateToken()">🔓 Access Dashboard</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🚚</div>
-                <div class="stat-label">In Transit</div>
-                <div class="stat-value" id="inTransitOrders">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-label">Delivered</div>
-                <div class="stat-value" id="deliveredOrders">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⏸️</div>
-                <div class="stat-label">Pending</div>
-                <div class="stat-value" id="pendingOrders">0</div>
-            </div>
+            <div id="tokenStatus"></div>
         </div>
 
-        <div class="filters-card">
-            <div class="filters">
-                <div class="filter-group">
-                    <label>Search Tracking</label>
-                    <input type="text" id="searchTracking" placeholder="Enter tracking number...">
-                </div>
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select id="statusFilter">
-                        <option value="">All Statuses</option>
-                        <option value="created">Created</option>
-                        <option value="picked">Picked Up</option>
-                        <option value="in-transit">In Transit</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="returned">Returned</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Date From</label>
-                    <input type="date" id="dateFrom">
-                </div>
-                <div class="filter-group">
-                    <label>Date To</label>
-                    <input type="date" id="dateTo">
-                </div>
-            </div>
-            <button class="filter-btn" onclick="applyFilters()">🔍 Apply Filters</button>
-        </div>
-
-        <div class="orders-card">
-            <div class="orders-header">
-                <h2>📋 Recent Orders</h2>
-                <button class="filter-btn" onclick="loadOrders()">🔄 Refresh</button>
+        <!-- Dashboard Content (Hidden until authenticated) -->
+        <div class="dashboard-content" id="dashboardContent">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <span style="color: #9CA3AF; margin-right: 10px;">✅ Authenticated</span>
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
             </div>
 
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Loading orders...</p>
-            </div>
-
-            <div id="ordersContainer">
-                <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
-                    <h3>No orders yet</h3>
-                    <p>Create your first order to get started</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value" id="totalOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🚚</div>
+                    <div class="stat-label">In Transit</div>
+                    <div class="stat-value" id="inTransitOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Delivered</div>
+                    <div class="stat-value" id="deliveredOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏸️</div>
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value" id="pendingOrders">0</div>
                 </div>
             </div>
 
-            <div class="pagination" id="pagination"></div>
+            <div class="filters-card">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Search Tracking</label>
+                        <input type="text" id="searchTracking" placeholder="Enter tracking number...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="created">Created</option>
+                            <option value="picked">Picked Up</option>
+                            <option value="in-transit">In Transit</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="returned">Returned</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date From</label>
+                        <input type="date" id="dateFrom">
+                    </div>
+                    <div class="filter-group">
+                        <label>Date To</label>
+                        <input type="date" id="dateTo">
+                    </div>
+                </div>
+                <button class="filter-btn" onclick="applyFilters()">🔍 Apply Filters</button>
+            </div>
+
+            <div class="orders-card">
+                <div class="orders-header">
+                    <h2>📋 Recent Orders</h2>
+                    <button class="filter-btn" onclick="loadOrders()">🔄 Refresh</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading orders...</p>
+                </div>
+
+                <div id="ordersContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔭</div>
+                        <h3>No orders yet</h3>
+                        <p>Create your first order to get started</p>
+                    </div>
+                </div>
+
+                <div class="pagination" id="pagination"></div>
+            </div>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://imir.ecotrack.dz';
-        const API_TOKEN = 'qyW7zYNUhC5ssqT6VNpfSMOSlFkwzYaNVA02rha2sPPtpasV9KiRgO1qw52D';
+        let API_TOKEN = '';
 
         let allOrders = [];
         let filteredOrders = [];
@@ -498,10 +639,87 @@
             'notification_on_order': 'Order Updated'
         };
 
-        // Load orders on page load
-        window.addEventListener('DOMContentLoaded', loadOrders);
+        // Check for saved token on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('arrow_api_token');
+            if (savedToken) {
+                API_TOKEN = savedToken;
+                document.getElementById('tokenCard').style.display = 'none';
+                document.getElementById('dashboardContent').classList.add('active');
+                loadOrders();
+            }
+        });
+
+        async function authenticateToken() {
+            const tokenInput = document.getElementById('apiTokenInput');
+            const token = tokenInput.value.trim();
+            const statusDiv = document.getElementById('tokenStatus');
+
+            if (!token) {
+                statusDiv.className = 'token-status error';
+                statusDiv.textContent = '❌ Please enter an API token';
+                return;
+            }
+
+            statusDiv.className = 'token-status';
+            statusDiv.textContent = '⏳ Verifying token...';
+
+            try {
+                // Test the token by fetching orders
+                const response = await fetch(`${API_URL}/api/v1/get/orders?api_token=${token}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    API_TOKEN = token;
+                    localStorage.setItem('arrow_api_token', token);
+                    
+                    statusDiv.className = 'token-status success';
+                    statusDiv.textContent = '✅ Authentication successful! Loading dashboard...';
+
+                    setTimeout(() => {
+                        document.getElementById('tokenCard').style.display = 'none';
+                        document.getElementById('dashboardContent').classList.add('active');
+                        loadOrders();
+                    }, 1000);
+                } else {
+                    statusDiv.className = 'token-status error';
+                    statusDiv.textContent = '❌ Invalid token. Please check and try again.';
+                }
+            } catch (error) {
+                statusDiv.className = 'token-status error';
+                statusDiv.textContent = '❌ Error connecting to server: ' + error.message;
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('arrow_api_token');
+                API_TOKEN = '';
+                allOrders = [];
+                filteredOrders = [];
+                
+                document.getElementById('dashboardContent').classList.remove('active');
+                document.getElementById('tokenCard').style.display = 'block';
+                document.getElementById('apiTokenInput').value = '';
+                document.getElementById('tokenStatus').textContent = '';
+            }
+        }
+
+        // Allow Enter key to submit token
+        document.getElementById('apiTokenInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                authenticateToken();
+            }
+        });
 
         async function loadOrders() {
+            if (!API_TOKEN) return;
+
             document.getElementById('loading').style.display = 'block';
             document.getElementById('ordersContainer').innerHTML = '';
 
@@ -520,6 +738,11 @@
                 console.log('Response status:', response.status);
 
                 if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        alert('Token expired or invalid. Please login again.');
+                        logout();
+                        return;
+                    }
                     const errorText = await response.text();
                     console.error('Error response:', errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -574,13 +797,15 @@
                 return statusClass === 'created' || statusClass === 'picked';
             }).length;
             document.getElementById('pendingOrders').textContent = pending;
+
+            console.log('Stats updated:', { total: allOrders.length, inTransit, delivered, pending });
         }
 
         function displayOrders() {
             const container = document.getElementById('ordersContainer');
             
             if (filteredOrders.length === 0) {
-                showEmptyState();
+                showEmptyState('No orders match your filters');
                 return;
             }
 
@@ -658,71 +883,35 @@
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
 
+            console.log('Applying filters:', { searchTracking, statusFilter, dateFrom, dateTo });
+
             filteredOrders = allOrders.filter(order => {
                 let match = true;
 
+                // Tracking search
                 if (searchTracking && !order.tracking.toLowerCase().includes(searchTracking)) {
                     match = false;
                 }
 
-                if (statusFilter && getStatusClass(order.status) !== statusFilter) {
-                    match = false;
+                // Status filter
+                if (statusFilter) {
+                    const orderStatusClass = getStatusClass(order.status);
+                    if (orderStatusClass !== statusFilter) {
+                        match = false;
+                    }
                 }
 
-                if (dateFrom && new Date(order.created_at) < new Date(dateFrom)) {
-                    match = false;
+                // Date filtering
+                if (dateFrom) {
+                    const orderDate = new Date(order.created_at);
+                    const fromDate = new Date(dateFrom);
+                    fromDate.setHours(0, 0, 0, 0);
+                    if (orderDate < fromDate) {
+                        match = false;
+                    }
                 }
 
-                if (dateTo && new Date(order.created_at) > new Date(dateTo)) {
-                    match = false;
-                }
-
-                return match;
-            });
-
-            currentPage = 1;
-            displayOrders();
-        }
-
-        function getStatusClass(status) {
-            if (status === 'livred' || status === 'livre_non_encaisse' || status === 'paye_et_archive') return 'delivered';
-            if (status.includes('return') || status.includes('retour') || status === 'annule') return 'returned';
-            if (status === 'dispatched_to_driver' || status === 'attempt_delivery' || status === 'en_livraison' || status === 'vers_wilaya') return 'in-transit';
-            if (status === 'picked' || status === 'accepted_by_carrier' || status === 'en_hub' || status === 'vers_hub' || status === 'en_ramassage') return 'picked';
-            if (status === 'suspendu') return 'suspended';
-            return 'created';
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        }
-
-        function viewOrder(tracking) {
-            window.location.href = `track-order.html?tracking=${tracking}`;
-        }
-
-        function showEmptyState(message = 'No orders found') {
-            document.getElementById('ordersContainer').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
-                    <h3>${message}</h3>
-                    <p>Try adjusting your filters or create a new order</p>
-                </div>
-            `;
-            document.getElementById('pagination').innerHTML = '';
-        }
-
-        // Real-time search
-        document.getElementById('searchTracking').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('dateFrom').addEventListener('change', applyFilters);
-        document.getElementById('dateTo').addEventListener('change', applyFilters);
-    </script>
-</body>
-</html>
+                if (dateTo) {
+                    const orderDate = new Date(order.created_at);
+                    const toDate = new Date(dateTo);
+                    toDate.setH
