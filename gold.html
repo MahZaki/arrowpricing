@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arrow — Gold Pricing</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#0B0B0B;min-height:100vh;padding:40px 20px;color:#E6E6E6;}
+.pin-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:#0B0B0B;z-index:100;}
+.pin-card{background:#1A1A1A;border:1px solid #92400e;border-radius:20px;padding:50px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(217,119,6,0.15);}
+.pin-card img{max-width:160px;margin-bottom:25px;filter:drop-shadow(0 4px 20px rgba(217,119,6,0.3));}
+.pin-card h2{font-size:1.8em;background:linear-gradient(135deg,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.pin-card p{color:#9CA3AF;margin-bottom:30px;font-size:.9em;}
+.pin-badge{display:inline-block;padding:6px 18px;background:linear-gradient(135deg,#d97706,#92400e);border-radius:30px;color:#fff;font-size:.8em;font-weight:700;margin-bottom:20px;letter-spacing:.08em;}
+.pin-card input{width:100%;padding:14px 18px;background:#0B0B0B;border:2px solid #92400e;border-radius:10px;color:#E6E6E6;font-size:1em;margin-bottom:15px;text-align:center;letter-spacing:.15em;transition:border-color .3s;}
+.pin-card input:focus{outline:none;border-color:#f59e0b;}
+.btn-gold{width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;color:#fff;font-size:1em;font-weight:700;cursor:pointer;transition:all .3s;}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(245,158,11,.35);}
+.err{color:#ef4444;font-size:.9em;margin-top:10px;}
+/* MAIN */
+.main-content{display:none;}
+.container{max-width:1200px;margin:0 auto;}
+.header{text-align:center;margin-bottom:40px;animation:fadeInDown .8s ease;}
+.logo{max-width:200px;height:auto;margin-bottom:25px;filter:drop-shadow(0 4px 20px rgba(245,158,11,.3));}
+.tier-badge{display:inline-block;padding:8px 24px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:30px;color:#fff;font-size:.95em;font-weight:700;margin-bottom:18px;letter-spacing:.06em;}
+.header h1{font-size:2.8em;background:linear-gradient(135deg,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.search-box{margin-bottom:30px;}
+.search-box input{width:100%;padding:15px 20px;border:2px solid #92400e;border-radius:12px;font-size:1em;background:#1A1A1A;color:#E6E6E6;transition:all .3s;}
+.search-box input:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.search-box input::placeholder{color:#9CA3AF;}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;animation:fadeInUp 1s ease;}
+.pricing-card{background:#1A1A1A;border-radius:15px;padding:25px;border:1px solid #92400e;transition:all .3s;}
+.pricing-card:hover{transform:translateY(-5px);border-color:#f59e0b;box-shadow:0 10px 30px rgba(245,158,11,.2);}
+.city-name{font-size:1.4em;font-weight:700;color:#f59e0b;margin-bottom:18px;display:flex;align-items:center;}
+.city-name::before{content:"📍";margin-right:10px;}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(146,64,14,.2);}
+.price-row:last-child{border-bottom:none;}
+.price-label{color:#9CA3AF;font-size:.95em;}
+.price-value{font-size:1.25em;font-weight:700;color:#d97706;}
+.price-value::after{content:" DA";font-size:.8em;color:#9CA3AF;}
+.no-results{text-align:center;color:#9CA3AF;font-size:1.2em;padding:40px;display:none;}
+.return-notice{background:linear-gradient(135deg,#92400e,#451a03);color:#E6E6E6;padding:20px;border-radius:15px;text-align:center;margin-top:30px;border:1px solid #f59e0b;}
+.return-notice h3{font-size:1.4em;margin-bottom:8px;color:#f59e0b;}
+.return-notice p{font-size:1.8em;font-weight:700;}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.header h1{font-size:2em}.pricing-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- PIN GATE -->
+<div class="pin-screen" id="pinScreen">
+  <div class="pin-card">
+    <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow">
+    <div class="pin-badge">🥇 GOLD TIER</div>
+    <h2>Restricted Access</h2>
+    <p>This page contains exclusive Gold pricing. Enter your PIN to continue.</p>
+    <input type="password" id="pinInput" placeholder="Enter PIN..." onkeydown="if(event.key==='Enter')checkPin()">
+    <button class="btn-gold" onclick="checkPin()">🔓 Access Gold Pricing</button>
+    <div class="err" id="pinErr"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content" id="mainContent">
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow Delivery Logo" class="logo">
+      <div class="tier-badge">🥇 GOLD TIER</div>
+      <h1>Gold Delivery Pricing</h1>
+      <p style="color:#9CA3AF;margin-top:8px;">Exclusive Gold tier rates — Arrow Livraison</p>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Search for your city...">
+    </div>
+    <div class="pricing-grid" id="pricingGrid"></div>
+    <div class="no-results" id="noResults">No cities found matching your search.</div>
+    <div class="return-notice">
+      <h3>Return Fee</h3>
+      <p>50 DA</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CORRECT_PIN = 'Arrow@2026';
+
+const defaultGoldPrices = [
+  {city:"Alger",domicile:430,stop:230},{city:"Blida",domicile:560,stop:350},
+  {city:"Boumerdès",domicile:560,stop:350},{city:"Tipaza",domicile:560,stop:350},
+  {city:"Bouira",domicile:700,stop:400},{city:"Médéa",domicile:700,stop:400},
+  {city:"Oran",domicile:750,stop:450},{city:"Sétif",domicile:750,stop:450},
+  {city:"Béjaïa",domicile:750,stop:450},{city:"Tizi Ouzou",domicile:700,stop:400},
+  {city:"Constantine",domicile:750,stop:450},{city:"Annaba",domicile:750,stop:450},
+  {city:"Mostaganem",domicile:750,stop:450},{city:"Chlef",domicile:750,stop:450},
+  {city:"Bordj Bou Arreridj",domicile:750,stop:450},{city:"Aïn Defla",domicile:750,stop:450},
+  {city:"Relizane",domicile:800,stop:450},{city:"Batna",domicile:750,stop:450},
+  {city:"Tlemcen",domicile:750,stop:450},{city:"Skikda",domicile:750,stop:450},
+  {city:"Tiaret",domicile:750,stop:450},{city:"M'Sila",domicile:780,stop:450},
+  {city:"Tébessa",domicile:780,stop:450},{city:"Jijel",domicile:750,stop:450},
+  {city:"Mascara",domicile:750,stop:450},{city:"Oum El Bouaghi",domicile:750,stop:450},
+  {city:"Mila",domicile:780,stop:450},{city:"Guelma",domicile:780,stop:450},
+  {city:"El Tarf",domicile:780,stop:450},{city:"Souk Ahras",domicile:780,stop:450},
+  {city:"Aïn Témouchent",domicile:750,stop:450},{city:"Khenchela",domicile:780,stop:450},
+  {city:"Saïda",domicile:750,stop:450},{city:"Tissemsilt",domicile:750,stop:450},
+  {city:"Sidi Bel Abbès",domicile:750,stop:450},{city:"Djelfa",domicile:850,stop:450},
+  {city:"Ouargla",domicile:900,stop:550},{city:"Biskra",domicile:850,stop:450},
+  {city:"El Oued",domicile:950,stop:550},{city:"Ghardaïa",domicile:900,stop:550},
+  {city:"Laghouat",domicile:850,stop:450},{city:"Béchar",domicile:980,stop:600},
+  {city:"Naama",domicile:980,stop:600},{city:"El Bayadh",domicile:1100,stop:550},
+  {city:"Adrar",domicile:1200,stop:700},{city:"Tindouf",domicile:1380,stop:1000},
+  {city:"Tamanrasset",domicile:1450,stop:900},{city:"Illizi",domicile:1680,stop:1000},
+  {city:"Timimoun",domicile:1200,stop:650},{city:"Ouled Djellal",domicile:900,stop:550},
+  {city:"Beni Abbès",domicile:1100,stop:550},{city:"In Salah",domicile:1600,stop:850},
+  {city:"Touggourt",domicile:900,stop:550},{city:"Djanet",domicile:2300,stop:1800},
+  {city:"El M'Ghair",domicile:1000,stop:550},{city:"El Meniaa",domicile:950,stop:550}
+];
+
+function checkPin() {
+  const pin = document.getElementById('pinInput').value;
+  if (pin === CORRECT_PIN) {
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initPricing();
+  } else {
+    document.getElementById('pinErr').textContent = '❌ Incorrect PIN. Please try again.';
+    setTimeout(()=>document.getElementById('pinErr').textContent='', 3000);
+  }
+}
+document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
+
+function initPricing() {
+  const saved = localStorage.getItem('arrow_gold_prices');
+  const data = saved ? JSON.parse(saved) : defaultGoldPrices;
+  renderCards(data);
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    const q = e.target.value.toLowerCase();
+    renderCards(data.filter(i=>i.city.toLowerCase().includes(q)));
+  });
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('pricingGrid');
+  const no = document.getElementById('noResults');
+  grid.innerHTML = '';
+  if(!data.length){ grid.style.display='none'; no.style.display='block'; return; }
+  grid.style.display='grid'; no.style.display='none';
+  data.forEach(item=>{
+    const card = document.createElement('div');
+    card.className='pricing-card';
+    card.innerHTML=`<div class="city-name">${item.city}</div>
+      <div class="price-row"><span class="price-label">Domicile Delivery</span><span class="price-value">${item.domicile}</span></div>
+      <div class="price-row"><span class="price-label">Stop Desk Pickup</span><span class="price-value">${item.stop}</span></div>`;
+    grid.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>

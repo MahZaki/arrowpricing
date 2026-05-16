@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin CMS — Arrow Pricing</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#0B0B0B;min-height:100vh;color:#E6E6E6;}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:#1A1A1A;border:1px solid #1E6F4A;border-radius:20px;padding:50px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(47,191,142,0.15);}
+.login-card img{max-width:160px;margin-bottom:25px;filter:drop-shadow(0 4px 20px rgba(47,191,142,0.3));}
+.login-card h2{font-size:1.8em;background:linear-gradient(135deg,#2FBF8E,#1E6F4A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.login-card p{color:#9CA3AF;margin-bottom:30px;font-size:0.9em;}
+.login-card input{width:100%;padding:14px 18px;background:#0B0B0B;border:2px solid #1E6F4A;border-radius:10px;color:#E6E6E6;font-size:1em;margin-bottom:15px;transition:border-color .3s;}
+.login-card input:focus{outline:none;border-color:#2FBF8E;}
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,#2FBF8E,#1E6F4A);border:none;border-radius:10px;color:#fff;font-size:1em;font-weight:700;cursor:pointer;transition:all .3s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(47,191,142,0.35);}
+.err{color:#ef4444;font-size:.9em;margin-top:10px;}
+/* ADMIN APP */
+.admin-app{display:none;min-height:100vh;}
+.topbar{background:#111;border-bottom:1px solid #1E6F4A;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+.topbar img{max-height:40px;}
+.topbar h1{font-size:1.1em;background:linear-gradient(135deg,#2FBF8E,#1E6F4A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-right{display:flex;gap:10px;align-items:center;}
+.btn-sm{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.85em;font-weight:600;transition:all .3s;}
+.btn-danger{background:#ef4444;color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-export{background:#1E6F4A;color:#fff;}
+.btn-export:hover{background:#2FBF8E;color:#0B0B0B;}
+.btn-share{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;}
+.btn-share:hover{opacity:.85;}
+.content{max-width:1300px;margin:0 auto;padding:30px 20px;}
+.tier-tabs{display:flex;gap:10px;margin-bottom:28px;}
+.tier-tab{padding:12px 28px;border-radius:10px;border:2px solid #1E6F4A;background:#1A1A1A;color:#E6E6E6;font-size:.95em;font-weight:700;cursor:pointer;transition:all .3s;}
+.tier-tab:hover{border-color:#2FBF8E;}
+.tier-tab.silver.active{background:linear-gradient(135deg,#6b7280,#374151);border-color:#9CA3AF;color:#fff;}
+.tier-tab.gold.active{background:linear-gradient(135deg,#d97706,#92400e);border-color:#f59e0b;color:#fff;}
+.tier-tab.platinum.active{background:linear-gradient(135deg,#7c3aed,#4c1d95);border-color:#a855f7;color:#fff;}
+.info-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.info-bar h2{font-size:1.15em;color:#2FBF8E;}
+.share-box{background:#1A1A1A;border:1px solid #1E6F4A;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.share-box span{color:#9CA3AF;font-size:.9em;}
+.share-box code{color:#2FBF8E;font-size:.9em;background:#0B0B0B;padding:4px 10px;border-radius:6px;}
+.table-wrap{background:#1A1A1A;border:1px solid #1E6F4A;border-radius:14px;overflow:hidden;}
+.price-table{width:100%;border-collapse:collapse;}
+.price-table th{padding:14px 18px;text-align:left;color:#2FBF8E;font-size:.85em;text-transform:uppercase;letter-spacing:.05em;background:#111;border-bottom:2px solid #1E6F4A;}
+.price-table td{padding:11px 18px;border-bottom:1px solid rgba(30,111,74,.2);}
+.price-table tr:last-child td{border-bottom:none;}
+.price-table tr:hover td{background:rgba(47,191,142,.04);}
+.city-cell{font-weight:600;color:#E6E6E6;}
+.zone-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.75em;font-weight:700;margin-left:8px;}
+.z0{background:#2FBF8E22;color:#2FBF8E;}
+.z1{background:#3b82f622;color:#3b82f6;}
+.z2{background:#f59e0b22;color:#f59e0b;}
+.z3{background:#ef444422;color:#ef4444;}
+.z4{background:#a855f722;color:#a855f7;}
+.z5{background:#6b728022;color:#9CA3AF;}
+.price-input{width:90px;padding:7px 10px;background:#0B0B0B;border:1.5px solid #1E6F4A;border-radius:7px;color:#E6E6E6;font-size:.95em;text-align:center;transition:border-color .2s;}
+.price-input:focus{outline:none;border-color:#2FBF8E;}
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #1E6F4A;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;z-index:100;}
+.save-bar span{color:#9CA3AF;font-size:.9em;}
+.btn-save{padding:12px 36px;background:linear-gradient(135deg,#2FBF8E,#1E6F4A);border:none;border-radius:10px;color:#fff;font-size:1em;font-weight:700;cursor:pointer;transition:all .3s;}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(47,191,142,.35);}
+.saved-msg{color:#2FBF8E;font-size:.9em;opacity:0;transition:opacity .4s;}
+.saved-msg.show{opacity:1;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#1A1A1A;border:1px solid #1E6F4A;border-radius:16px;padding:30px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
+.modal h3{color:#2FBF8E;margin-bottom:14px;}
+.modal textarea{width:100%;height:200px;background:#0B0B0B;border:1.5px solid #1E6F4A;border-radius:8px;color:#E6E6E6;font-size:.8em;padding:12px;margin-bottom:14px;resize:vertical;}
+.modal-btns{display:flex;gap:10px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow">
+    <h2>Admin CMS</h2>
+    <p>Enter your password to access price management</p>
+    <input type="password" id="pwInput" placeholder="Password..." onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-primary" onclick="doLogin()">🔐 Login</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div class="admin-app" id="adminApp">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="https://i.imgur.com/ofuT9Pm.png" alt="Arrow">
+      <h1>Pricing CMS</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-sm btn-export" onclick="openExport()">📤 Export / Import</button>
+      <button class="btn-sm btn-danger" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="tier-tabs">
+      <button class="tier-tab silver active" onclick="switchTier('silver')">🥈 Silver (Public)</button>
+      <button class="tier-tab gold" onclick="switchTier('gold')">🥇 Gold (Hidden)</button>
+      <button class="tier-tab platinum" onclick="switchTier('platinum')">💎 Platinum (Hidden)</button>
+    </div>
+
+    <!-- Silver info -->
+    <div id="silver-info" class="info-bar">
+      <h2>🥈 Silver Pricing — Public on index.html</h2>
+    </div>
+
+    <!-- Gold info -->
+    <div id="gold-info" class="info-bar" style="display:none">
+      <h2>🥇 Gold Pricing — Hidden page</h2>
+      <div class="topbar-right">
+        <button class="btn-sm btn-share" onclick="copyLink('gold')">🔗 Copy Gold Link + PIN</button>
+      </div>
+    </div>
+
+    <!-- Platinum info -->
+    <div id="platinum-info" class="info-bar" style="display:none">
+      <h2>💎 Platinum Pricing — Hidden page</h2>
+      <div class="topbar-right">
+        <button class="btn-sm btn-share" onclick="copyLink('platinum')">🔗 Copy Platinum Link + PIN</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="price-table">
+        <thead>
+          <tr>
+            <th>Wilaya</th>
+            <th>Zone</th>
+            <th>Domicile (DA)</th>
+            <th>Stop Desk (DA)</th>
+          </tr>
+        </thead>
+        <tbody id="priceTableBody"></tbody>
+      </table>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+
+  <div class="save-bar">
+    <span id="savedMsg" class="saved-msg">✅ Saved successfully!</span>
+    <button class="btn-save" onclick="savePrices()">💾 Save Changes</button>
+  </div>
+</div>
+
+<!-- Export/Import Modal -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3>📤 Export / Import Prices</h3>
+    <p style="color:#9CA3AF;font-size:.85em;margin-bottom:12px;">Copy the JSON below to back up or transfer prices to another browser. Paste exported JSON here to import.</p>
+    <textarea id="exportArea"></textarea>
+    <div class="modal-btns">
+      <button class="btn-sm btn-export" onclick="copyExport()">📋 Copy JSON</button>
+      <button class="btn-sm btn-primary" style="background:#2FBF8E;color:#0B0B0B;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:700;" onclick="importJSON()">📥 Import JSON</button>
+      <button class="btn-sm btn-danger" onclick="closeExport()">✖ Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASS = 'Arrow@Admin2026';
+const GOLD_PIN = 'Arrow@2026';
+const PLAT_PIN = 'Arrow@2026';
+const BASE_URL = window.location.href.replace('admin.html','');
+
+const defaultData = [
+  {city:"Alger",zone:0,silver:{d:450,s:250},gold:{d:430,s:230},platinum:{d:400,s:200}},
+  {city:"Blida",zone:1,silver:{d:570,s:350},gold:{d:560,s:350},platinum:{d:500,s:320}},
+  {city:"Boumerdès",zone:1,silver:{d:570,s:350},gold:{d:560,s:350},platinum:{d:500,s:320}},
+  {city:"Tipaza",zone:1,silver:{d:570,s:350},gold:{d:560,s:350},platinum:{d:500,s:320}},
+  {city:"Bouira",zone:2,silver:{d:700,s:400},gold:{d:700,s:400},platinum:{d:630,s:360}},
+  {city:"Médéa",zone:2,silver:{d:700,s:400},gold:{d:700,s:400},platinum:{d:630,s:360}},
+  {city:"Oran",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Sétif",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Béjaïa",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Tizi Ouzou",zone:2,silver:{d:700,s:400},gold:{d:700,s:400},platinum:{d:630,s:360}},
+  {city:"Constantine",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Annaba",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Mostaganem",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Chlef",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Bordj Bou Arreridj",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Aïn Defla",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Relizane",zone:2,silver:{d:820,s:450},gold:{d:800,s:450},platinum:{d:730,s:400}},
+  {city:"Batna",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Tlemcen",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Skikda",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:690,s:400}},
+  {city:"Tiaret",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"M'Sila",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Tébessa",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Jijel",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Mascara",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Oum El Bouaghi",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Mila",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Guelma",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"El Tarf",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Souk Ahras",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Aïn Témouchent",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Khenchela",zone:2,silver:{d:800,s:450},gold:{d:780,s:450},platinum:{d:720,s:400}},
+  {city:"Saïda",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Tissemsilt",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Sidi Bel Abbès",zone:2,silver:{d:770,s:450},gold:{d:750,s:450},platinum:{d:700,s:400}},
+  {city:"Djelfa",zone:3,silver:{d:870,s:450},gold:{d:850,s:450},platinum:{d:800,s:400}},
+  {city:"Ouargla",zone:3,silver:{d:950,s:550},gold:{d:900,s:550},platinum:{d:860,s:480}},
+  {city:"Biskra",zone:3,silver:{d:870,s:450},gold:{d:850,s:450},platinum:{d:800,s:400}},
+  {city:"El Oued",zone:3,silver:{d:1000,s:550},gold:{d:950,s:550},platinum:{d:920,s:490}},
+  {city:"Ghardaïa",zone:3,silver:{d:920,s:550},gold:{d:900,s:550},platinum:{d:830,s:500}},
+  {city:"Laghouat",zone:3,silver:{d:870,s:450},gold:{d:850,s:450},platinum:{d:800,s:400}},
+  {city:"Béchar",zone:4,silver:{d:1000,s:600},gold:{d:980,s:600},platinum:{d:930,s:520}},
+  {city:"Naama",zone:4,silver:{d:1000,s:600},gold:{d:980,s:600},platinum:{d:930,s:520}},
+  {city:"El Bayadh",zone:4,silver:{d:1100,s:550},gold:{d:1100,s:550},platinum:{d:1000,s:500}},
+  {city:"Adrar",zone:4,silver:{d:1200,s:700},gold:{d:1200,s:700},platinum:{d:1100,s:600}},
+  {city:"Tindouf",zone:5,silver:{d:1400,s:1000},gold:{d:1380,s:1000},platinum:{d:1300,s:920}},
+  {city:"Tamanrasset",zone:5,silver:{d:1450,s:900},gold:{d:1450,s:900},platinum:{d:1400,s:820}},
+  {city:"Illizi",zone:5,silver:{d:1700,s:1000},gold:{d:1680,s:1000},platinum:{d:1600,s:920}},
+  {city:"Timimoun",zone:5,silver:{d:1200,s:650},gold:{d:1200,s:650},platinum:{d:1100,s:600}},
+  {city:"Ouled Djellal",zone:5,silver:{d:900,s:550},gold:{d:900,s:550},platinum:{d:830,s:480}},
+  {city:"Beni Abbès",zone:5,silver:{d:1100,s:550},gold:{d:1100,s:550},platinum:{d:1050,s:500}},
+  {city:"In Salah",zone:5,silver:{d:1600,s:850},gold:{d:1600,s:850},platinum:{d:1500,s:800}},
+  {city:"Touggourt",zone:5,silver:{d:900,s:550},gold:{d:900,s:550},platinum:{d:850,s:500}},
+  {city:"Djanet",zone:5,silver:{d:2300,s:1800},gold:{d:2300,s:1800},platinum:{d:2250,s:1800}},
+  {city:"El M'Ghair",zone:5,silver:{d:1000,s:550},gold:{d:1000,s:550},platinum:{d:950,s:500}},
+  {city:"El Meniaa",zone:5,silver:{d:950,s:550},gold:{d:950,s:550},platinum:{d:900,s:500}}
+];
+
+let currentTier = 'silver';
+let tableData = [];
+
+function loadData() {
+  const saved = localStorage.getItem('arrow_cms_data');
+  tableData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+}
+
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === ADMIN_PASS) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    loadData();
+    renderTable();
+  } else {
+    document.getElementById('loginErr').textContent = '❌ Incorrect password.';
+    setTimeout(()=>document.getElementById('loginErr').textContent='', 3000);
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  if(confirm('Logout?')) {
+    document.getElementById('adminApp').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('pwInput').value = '';
+  }
+}
+
+function switchTier(tier) {
+  currentTier = tier;
+  document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tier-tab.'+tier).classList.add('active');
+  ['silver','gold','platinum'].forEach(t => {
+    document.getElementById(t+'-info').style.display = t===tier ? 'flex' : 'none';
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('priceTableBody');
+  tbody.innerHTML = '';
+  tableData.forEach((row, i) => {
+    const t = row[currentTier];
+    const zc = ['z0','z1','z2','z3','z4','z5'][row.zone] || 'z5';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="city-cell">${row.city}<span class="zone-badge ${zc}">Z${row.zone}</span></td>
+      <td>Zone ${row.zone}</td>
+      <td><input class="price-input" type="number" value="${t.d}" id="d_${i}" min="0"></td>
+      <td><input class="price-input" type="number" value="${t.s}" id="s_${i}" min="0"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function savePrices() {
+  tableData.forEach((row, i) => {
+    const d = parseInt(document.getElementById('d_'+i).value) || 0;
+    const s = parseInt(document.getElementById('s_'+i).value) || 0;
+    row[currentTier].d = d;
+    row[currentTier].s = s;
+  });
+  localStorage.setItem('arrow_cms_data', JSON.stringify(tableData));
+  // Also sync individual tier keys for the public pages
+  const silver = tableData.map(r=>({city:r.city, domicile:r.silver.d, stop:r.silver.s}));
+  const gold   = tableData.map(r=>({city:r.city, domicile:r.gold.d,   stop:r.gold.s}));
+  const plat   = tableData.map(r=>({city:r.city, domicile:r.platinum.d,stop:r.platinum.s}));
+  localStorage.setItem('arrow_silver_prices', JSON.stringify(silver));
+  localStorage.setItem('arrow_gold_prices',   JSON.stringify(gold));
+  localStorage.setItem('arrow_platinum_prices',JSON.stringify(plat));
+  const msg = document.getElementById('savedMsg');
+  msg.classList.add('show');
+  setTimeout(() => msg.classList.remove('show'), 2500);
+}
+
+function copyLink(tier) {
+  const pin = tier==='gold' ? GOLD_PIN : PLAT_PIN;
+  const url = BASE_URL + tier + '.html';
+  const text = `🔗 ${tier.charAt(0).toUpperCase()+tier.slice(1)} Pricing Page\nURL: ${url}\nPIN: ${pin}`;
+  navigator.clipboard.writeText(text).then(()=>alert('✅ Link + PIN copied to clipboard!\n\n'+text));
+}
+
+function openExport() {
+  loadData();
+  document.getElementById('exportArea').value = JSON.stringify(tableData, null, 2);
+  document.getElementById('exportModal').classList.add('show');
+}
+function closeExport() { document.getElementById('exportModal').classList.remove('show'); }
+function copyExport() {
+  navigator.clipboard.writeText(document.getElementById('exportArea').value)
+    .then(()=>alert('✅ JSON copied!'));
+}
+function importJSON() {
+  try {
+    const parsed = JSON.parse(document.getElementById('exportArea').value);
+    if(!Array.isArray(parsed)) throw new Error('Invalid format');
+    tableData = parsed;
+    localStorage.setItem('arrow_cms_data', JSON.stringify(tableData));
+    renderTable();
+    closeExport();
+    alert('✅ Prices imported successfully!');
+  } catch(e) { alert('❌ Invalid JSON: ' + e.message); }
+}
+</script>
+</body>
+</html>
