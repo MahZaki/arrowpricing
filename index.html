@@ -990,18 +990,19 @@
             btn.textContent = 'Envoi en cours…';
             btn.disabled    = true;
 
-            // Build Telegram message
+            // Build Telegram message (HTML parse mode — more reliable than Markdown)
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             const text = [
-                '🟢 *Nouvelle Inscription Client — Arrow Delivery*',
+                '🟢 <b>Nouvelle Inscription Client — Arrow Delivery</b>',
                 '',
-                `👤 *Nom:* ${firstName} ${lastName}`,
-                `📞 *Téléphone:* ${phone}`,
-                `📍 *Wilaya:* ${wilaya}`,
-                shopName  ? `🏪 *Boutique:* ${shopName}`       : '',
-                avgVolume ? `📦 *Volume/mois:* ${avgVolume}`   : '',
-                message   ? `💬 *Message:* ${message}`         : '',
+                `👤 <b>Nom:</b> ${esc(firstName + ' ' + lastName)}`,
+                `📞 <b>Téléphone:</b> ${esc(phone)}`,
+                `📍 <b>Wilaya:</b> ${esc(wilaya)}`,
+                shopName  ? `🏪 <b>Boutique:</b> ${esc(shopName)}`     : '',
+                avgVolume ? `📦 <b>Volume/mois:</b> ${esc(avgVolume)}` : '',
+                message   ? `💬 <b>Message:</b> ${esc(message)}`       : '',
                 '',
-                `🕐 _${new Date().toLocaleString('fr-DZ', { timeZone: 'Africa/Algiers' })}_`
+                `🕐 <i>${new Date().toLocaleString('fr-DZ', { timeZone: 'Africa/Algiers' })}</i>`
             ].filter(Boolean).join('\n');
 
             try {
@@ -1011,7 +1012,7 @@
                     body: JSON.stringify({
                         chat_id:    TG_CHAT_ID,
                         text:       text,
-                        parse_mode: 'Markdown'
+                        parse_mode: 'HTML'
                     })
                 });
 
