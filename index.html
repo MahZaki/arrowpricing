@@ -953,12 +953,19 @@
     </script>
 </body>
 <script>
-        function handleSubmit() {
+        const TG_TOKEN   = '8869480537:AAEm7BdsOZUAAGTaW5uHlmoVHV7bDolwww8';
+        const TG_CHAT_ID = '7753887180';
+
+        async function handleSubmit() {
             const firstName = document.getElementById('firstName').value.trim();
             const lastName  = document.getElementById('lastName').value.trim();
             const phone     = document.getElementById('phone').value.trim();
             const wilaya    = document.getElementById('wilaya').value;
+            const shopName  = document.getElementById('shopName').value.trim();
+            const avgVolume = document.getElementById('avgVolume').value;
+            const message   = document.getElementById('message').value.trim();
 
+            // Validate required fields
             if (!firstName || !lastName || !phone || !wilaya) {
                 const fields = [
                     { el: document.getElementById('firstName'), val: firstName },
@@ -983,12 +990,44 @@
             btn.textContent = 'Envoi en cours…';
             btn.disabled    = true;
 
-            setTimeout(() => {
+            // Build Telegram message
+            const text = [
+                '🟢 *Nouvelle Inscription Client — Arrow Delivery*',
+                '',
+                `👤 *Nom:* ${firstName} ${lastName}`,
+                `📞 *Téléphone:* ${phone}`,
+                `📍 *Wilaya:* ${wilaya}`,
+                shopName  ? `🏪 *Boutique:* ${shopName}`       : '',
+                avgVolume ? `📦 *Volume/mois:* ${avgVolume}`   : '',
+                message   ? `💬 *Message:* ${message}`         : '',
+                '',
+                `🕐 _${new Date().toLocaleString('fr-DZ', { timeZone: 'Africa/Algiers' })}_`
+            ].filter(Boolean).join('\n');
+
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id:    TG_CHAT_ID,
+                        text:       text,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                if (!res.ok) throw new Error('Telegram API error');
+
+                // Show success
                 document.getElementById('inscriptionForm').style.display = 'none';
                 const success = document.getElementById('formSuccess');
                 success.style.display = 'block';
                 document.getElementById('successName').textContent = firstName + ' ' + lastName;
-            }, 800);
+
+            } catch (err) {
+                btn.textContent = 'Envoyer ma demande →';
+                btn.disabled    = false;
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
         }
     </script>
 </html>
