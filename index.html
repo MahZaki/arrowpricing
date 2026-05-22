@@ -955,6 +955,7 @@
 <script>
         const TG_TOKEN   = '8869480537:AAEm7BdsOZUAAGTaW5uHlmoVHV7bDolwww8';
         const TG_CHAT_ID = '-5257891716';
+        const GSHEET_URL = ''; // Remplir avec l'URL de votre Google Apps Script (Web App)
 
         async function handleSubmit() {
             const firstName = document.getElementById('firstName').value.trim();
@@ -990,6 +991,8 @@
             btn.textContent = 'Envoi en cours…';
             btn.disabled    = true;
 
+            const dateStr = new Date().toLocaleString('fr-DZ', { timeZone: 'Africa/Algiers' });
+
             // Build Telegram message (HTML parse mode — more reliable than Markdown)
             const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             const text = [
@@ -1002,11 +1005,12 @@
                 avgVolume ? `📦 <b>Volume/mois:</b> ${esc(avgVolume)}` : '',
                 message   ? `💬 <b>Message:</b> ${esc(message)}`       : '',
                 '',
-                `🕐 <i>${new Date().toLocaleString('fr-DZ', { timeZone: 'Africa/Algiers' })}</i>`
+                `🕐 <i>${dateStr}</i>`
             ].filter(Boolean).join('\n');
 
             try {
-                const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+                // Send to Telegram
+                const tgPromise = fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1014,9 +1018,34 @@
                         text:       text,
                         parse_mode: 'HTML'
                     })
+                }).then(res => {
+                    if (!res.ok) throw new Error('Telegram API error');
                 });
 
-                if (!res.ok) throw new Error('Telegram API error');
+                // Send to Google Sheets (if URL is set)
+                let sheetPromise = Promise.resolve();
+                if (GSHEET_URL) {
+                    sheetPromise = fetch(GSHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Avoids CORS preflight issues with Google Apps Script
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            firstName,
+                            lastName,
+                            phone,
+                            wilaya,
+                            shopName,
+                            avgVolume,
+                            message,
+                            date: dateStr
+                        })
+                    }).catch(err => {
+                        console.error('Google Sheets submission failed:', err);
+                        // Do not block the user success if only Google Sheets fails
+                    });
+                }
+
+                await Promise.all([tgPromise, sheetPromise]);
 
                 // Show success
                 document.getElementById('inscriptionForm').style.display = 'none';
@@ -1025,9 +1054,10 @@
                 document.getElementById('successName').textContent = firstName + ' ' + lastName;
 
             } catch (err) {
+                console.error(err);
                 btn.textContent = 'Envoyer ma demande →';
                 btn.disabled    = false;
-                alert('Une erreur est survenue. Veuillez réessayer.');
+                alert('Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');
             }
         }
     </script>
