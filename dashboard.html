@@ -919,3 +919,57 @@
                         match = false;
                     }
                 }
+
+                return match;
+            });
+
+            currentPage = 1;
+            displayOrders();
+        }
+
+        function getStatusClass(status) {
+            if (status === 'livred' || status === 'livre_non_encaisse' || status === 'paye_et_archive') return 'delivered';
+            if (status.includes('return') || status.includes('retour') || status === 'annule') return 'returned';
+            if (status === 'dispatched_to_driver' || status === 'attempt_delivery' || status === 'en_livraison' || status === 'vers_wilaya') return 'in-transit';
+            if (status === 'picked' || status === 'accepted_by_carrier' || status === 'en_hub' || status === 'vers_hub' || status === 'en_ramassage') return 'picked';
+            if (status === 'suspendu') return 'suspended';
+            return 'created';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function viewOrder(tracking) {
+            window.location.href = `track-order.html?tracking=${tracking}`;
+        }
+
+        function showEmptyState(message = 'No orders found') {
+            document.getElementById('ordersContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>${message}</h3>
+                    <p>Try adjusting your filters or create a new order</p>
+                </div>
+            `;
+            document.getElementById('pagination').innerHTML = '';
+        }
+
+        // Real-time search
+        document.getElementById('searchTracking').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('dateFrom').addEventListener('change', applyFilters);
+        document.getElementById('dateTo').addEventListener('change', applyFilters);
+    </script>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
