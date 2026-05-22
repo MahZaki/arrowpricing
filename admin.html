@@ -168,7 +168,20 @@ body{font-family:'Segoe UI',sans-serif;background:#0B0B0B;min-height:100vh;color
 const ADMIN_PASS = 'Arrow@Admin2026';
 const GOLD_PIN = 'Arrow@2026';
 const PLAT_PIN = 'Arrow@2026';
-const BASE_URL = window.location.href.replace('admin.html','');
+const getBaseUrl = () => {
+  let href = window.location.href.split('?')[0].split('#')[0];
+  if (href.endsWith('.html')) {
+    return href.substring(0, href.lastIndexOf('/') + 1);
+  }
+  const ends = ['admin', 'dashboard', 'gold', 'platinum', 'track-order'];
+  for (const end of ends) {
+    if (href.endsWith('/' + end)) {
+      return href.substring(0, href.lastIndexOf('/') + 1);
+    }
+  }
+  return href.endsWith('/') ? href : href + '/';
+};
+const BASE_URL = getBaseUrl();
 
 const defaultData = [
   {city:"Alger",zone:0,silver:{d:450,s:250},gold:{d:430,s:230},platinum:{d:400,s:200}},
@@ -308,7 +321,8 @@ function savePrices() {
 
 function copyLink(tier) {
   const pin = tier==='gold' ? GOLD_PIN : PLAT_PIN;
-  const url = BASE_URL + tier + '.html';
+  const hasHtml = window.location.href.includes('.html');
+  const url = BASE_URL + tier + (hasHtml ? '.html' : '');
   const text = `🔗 ${tier.charAt(0).toUpperCase()+tier.slice(1)} Pricing Page\nURL: ${url}\nPIN: ${pin}`;
   navigator.clipboard.writeText(text).then(()=>alert('✅ Link + PIN copied to clipboard!\n\n'+text));
 }
